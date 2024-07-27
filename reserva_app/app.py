@@ -9,8 +9,8 @@ def contains_register(registers: list[str], predicate: Callable[[], bool]) -> bo
     
     return False
 
-
 LOCAL_DATABASE_USERS_PATH = 'csv-database/users.csv'
+LOCAL_DATABASE_SALAS_RESERVADAS_PATH = "csv-database\salas_reservadas.csv"
 
 app = Flask(__name__)
 
@@ -56,9 +56,18 @@ def cadastro_page():
 def reservas_page():
     return render_template('reservas.html')
 
-@app.route('/reservar-sala')
+@app.route('/reservar-sala', methods=['GET', 'POST'])
 def reservar_sala_page():
-    return render_template('reservar-sala.html')
+    if request.method == 'GET':
+        return render_template('reservar-sala.html')
+    if request.method == 'POST':
+        sala = request.form['sala']
+        inicio = request.form['inicio']
+        fim = request.form['fim']
+
+        sala_cadastrada = [sala,inicio,fim]
+        save_csv(LOCAL_DATABASE_SALAS_RESERVADAS_PATH, sala_cadastrada)
+        return render_template('reserva/detalhe-reserva.html')
 
 @app.route('/listar-salas')
 def listar_salas_page():

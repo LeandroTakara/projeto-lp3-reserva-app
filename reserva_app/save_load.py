@@ -7,7 +7,7 @@ def save_csv(file: str, data: list[str]) -> None:
         :param file: nome do arquivo
         :param data: lista de string para salvar
     '''
-
+    
     with open(file, 'a') as f:
         csv_writer = writer(f, lineterminator='\n')
 
@@ -24,7 +24,7 @@ def load_csv(file: str) -> list[str]:
     rows = []
 
     with open(file, 'r') as f:
-        csv_reader = reader(f, lineterminator='\n')
+        csv_reader = reader(f)
 
         for row in csv_reader:
             rows.append(row)
