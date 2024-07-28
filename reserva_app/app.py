@@ -79,7 +79,16 @@ def reservar_sala_page():
         sala_cadastrada = [sala,inicio,fim]
         save_csv(LOCAL_DATABASE_SALAS_RESERVADAS_PATH, sala_cadastrada)
 
-        return render_template('reserva/detalhe-reserva.html', rooms_list = lista_salas)
+        sala_cadastrada[1] = sala_cadastrada[1].replace("T", " - ")
+        sala_cadastrada[2] = sala_cadastrada[2].replace("T", " - ")
+
+        sala_cadastrada = [{
+            "sala" : sala_cadastrada[0],
+            "inicio" : sala_cadastrada[1],
+            "fim" : sala_cadastrada[2]
+        }]
+
+        return render_template('reserva/detalhe-reserva.html', reserve_details = sala_cadastrada)
 
 @app.route('/listar-salas')
 def listar_salas_page():
