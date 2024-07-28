@@ -30,3 +30,13 @@ def load_csv(file: str) -> list[str]:
             rows.append(row)
 
     return rows
+
+def get_room_id():
+
+    with open("./csv-database/room_id.csv", 'r') as room_id:
+        ide = int(room_id.read())
+        
+    with open("./csv-database/room_id.csv", 'w') as room_id:
+        room_id.write(f"{ide+1}")
+
+    return ide

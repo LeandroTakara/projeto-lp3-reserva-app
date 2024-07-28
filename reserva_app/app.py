@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request
-from save_load import save_csv, load_csv
+from save_load import save_csv, load_csv, get_room_id
 from typing import Callable
 from cadastrar_salas import cadastrar_uma_sala
 
@@ -11,7 +11,7 @@ def contains_register(registers: list[str], predicate: Callable[[], bool]) -> bo
     return False
 
 LOCAL_DATABASE_USERS_PATH = 'csv-database/users.csv'
-LOCAL_DATABASE_SALAS_RESERVADAS_PATH = "csv-database\salas_reservadas.csv"
+LOCAL_DATABASE_SALAS_RESERVADAS_PATH = "csv-database/salas_reservadas.csv"
 
 app = Flask(__name__)
 
@@ -59,8 +59,18 @@ def reservas_page():
 
 @app.route('/reservar-sala', methods=['GET', 'POST'])
 def reservar_sala_page():
+
+    with open("./csv-database/rooms.csv", "r") as salinhas:
+
+            lista_salas = []
+            
+            for salinha in salinhas:
+            
+                salinha_cheirosa = salinha.strip().split(",")
+                lista_salas.append({"ID": salinha_cheirosa[0]})
+
     if request.method == 'GET':
-        return render_template('reservar-sala.html')
+        return render_template('reservar-sala.html', rooms_list = lista_salas)
     if request.method == 'POST':
         sala = request.form['sala']
         inicio = request.form['inicio']
@@ -68,11 +78,21 @@ def reservar_sala_page():
 
         sala_cadastrada = [sala,inicio,fim]
         save_csv(LOCAL_DATABASE_SALAS_RESERVADAS_PATH, sala_cadastrada)
-        return render_template('reserva/detalhe-reserva.html')
+
+        return render_template('reserva/detalhe-reserva.html', rooms_list = lista_salas)
 
 @app.route('/listar-salas')
 def listar_salas_page():
-    return render_template('listar-salas.html')
+
+    lista_salas = []
+
+    with open("./csv-database/rooms.csv", "r") as salinhas:
+        for salinha in salinhas:
+        
+            salinha_cheirosa = salinha.strip().split(",")
+            lista_salas.append({"ID": salinha_cheirosa[0],"tipo": salinha_cheirosa[1], "capacidade": salinha_cheirosa[2], "descricao": salinha_cheirosa[3], "ativa":salinha_cheirosa[4]})
+
+    return render_template('listar-salas.html', rooms_list = lista_salas)
 
 @app.route('/cadastrar-sala', methods= ['GET','POST'])
 def cadastrar_sala_page():
@@ -85,8 +105,9 @@ def cadastrar_sala_page():
         tipo = request.form["tipo"]
         capacidade = request.form["capacidade"]
         descricao = request.form["descricao"]
-
-        sala_cadastrada = {"tipo":tipo, "capacidade":capacidade, "descricao":descricao}
+        ide = get_room_id()
+        
+        sala_cadastrada = {"ID": ide, "tipo":tipo, "capacidade":capacidade, "descricao":descricao, "ativa": "Sim"}
         cadastrar_uma_sala(sala_cadastrada)
 
         return render_template('cadastrar-sala.html')
