@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request
 from save_load import save_csv, load_csv
 from typing import Callable
+from cadastrar_salas import cadastrar_uma_sala
 
 def contains_register(registers: list[str], predicate: Callable[[], bool]) -> bool:
     for register in registers:
@@ -73,9 +74,22 @@ def reservar_sala_page():
 def listar_salas_page():
     return render_template('listar-salas.html')
 
-@app.route('/cadastrar-sala')
+@app.route('/cadastrar-sala', methods= ['GET','POST'])
 def cadastrar_sala_page():
-    return render_template('cadastrar-sala.html')
+
+    if request.method == 'GET':
+        return render_template('cadastrar-sala.html')
+    
+    if request.method == 'POST':
+    
+        tipo = request.form["tipo"]
+        capacidade = request.form["capacidade"]
+        descricao = request.form["descricao"]
+
+        sala_cadastrada = {"tipo":tipo, "capacidade":capacidade, "descricao":descricao}
+        cadastrar_uma_sala(sala_cadastrada)
+
+        return render_template('cadastrar-sala.html')
 
 @app.route('/reserva/detalhe-reserva')
 def reserva_detalhe_reserva_page():
