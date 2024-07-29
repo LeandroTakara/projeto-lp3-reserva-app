@@ -8,7 +8,7 @@ def save_csv(file: str, data: list[str]) -> None:
         :param data: lista de string para salvar
     '''
     
-    with open(file, 'a') as f:
+    with open(file, 'a', encoding='utf-8') as f:
         csv_writer = writer(f, lineterminator='\n')
 
         csv_writer.writerow(data)
@@ -23,7 +23,7 @@ def load_csv(file: str) -> list[str]:
 
     rows = []
 
-    with open(file, 'r') as f:
+    with open(file, 'r', encoding='utf-8') as f:
         csv_reader = reader(f)
 
         for row in csv_reader:
@@ -31,12 +31,3 @@ def load_csv(file: str) -> list[str]:
 
     return rows
 
-def get_room_id():
-
-    with open("./csv-database/room_id.csv", 'r') as room_id:
-        ide = int(room_id.read())
-        
-    with open("./csv-database/room_id.csv", 'w') as room_id:
-        room_id.write(f"{ide+1}")
-
-    return ide

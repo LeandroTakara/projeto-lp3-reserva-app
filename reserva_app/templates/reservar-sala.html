@@ -16,11 +16,9 @@
         <div class="mb-3">
           <label for="sala" class="form-label">Sala</label>
           <select class="form-select" id="sala" name="sala">
-
             {% for room in rooms_list %}
-            <option value= {{room.ID}}>Sala {{room.ID}}</option>
+              <option value= {{room.ID}}>Sala {{room.ID}}</option>
             {% endfor %}
-            
           </select>
         </div>
         <div class="mb-3">
