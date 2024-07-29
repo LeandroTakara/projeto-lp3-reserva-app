@@ -57,12 +57,17 @@ def cadastro_page():
         email = request.form['email']
         password = request.form['password']
 
+        users = load_csv(LOCAL_DATABASE_USERS_PATH)
+
+        if contains_register(users, lambda user: user[1] == email):
+            return render_template('cadastro.html')
+
         user = [nome, email, password]
 
         save_csv(LOCAL_DATABASE_USERS_PATH, user)
 
         return render_template('login.html')
-
+    
     raise Exception(f'Invalid {request.method} method in cadastro_page()')
 
 @app.route('/reservas')
