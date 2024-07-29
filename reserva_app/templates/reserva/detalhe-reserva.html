@@ -6,13 +6,11 @@
 <div class="container">
   <div class="row mt-4">
     <div class="col">
-      <h1>Reserva 832</h1>
-      {% for i in reserve_details %}
-        <p><b>Sala:</b> {{i.sala}}</p>
-        <p><b>Início:</b> {{i.inicio}}</p>
-        <p><b>Fim:</b> {{i.fim}}</p>
-      {% endfor %}
-      <p>Reservado para Nome do Professor</p>
+      <h1>Reserva {{reserve_details.ID}}</h1>
+        <p><b>Sala:</b> {{reserve_details.sala}}</p>
+        <p><b>Início:</b> {{reserve_details.inicio}}</p>
+        <p><b>Fim:</b> {{reserve_details.fim}}</p>
+      <p>{{nome_usuario}}</p>
     </div>
   </div>
   <div class="row">
