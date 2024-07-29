@@ -11,24 +11,36 @@ def get_room_id():
 
     return ide
 
+def get_reserve_id():
+    with open(NEXT_RESERVE_ID_PATH, 'r') as reserve_id:
+        ide = int(reserve_id.read())
+        
+    with open(NEXT_RESERVE_ID_PATH, 'w') as reserve_id:
+        reserve_id.write(f"{ide+1}")
+
+    return ide
+
 def contains_register(registers: list[str], predicate: Callable[[], bool]) -> bool:
     for register in registers:
         if predicate(register):
-            return True
+            return [True, register[0]]
     
-    return False
-
+    return [False]
 
 NEXT_ID_PATH = './csv-database/room_id.csv'
+NEXT_RESERVE_ID_PATH = './csv-database/reserve_id.csv'
 
 LOCAL_DATABASE_USERS_PATH = 'csv-database/users.csv'
 LOCAL_DATABASE_RESERVED_ROOMS_PATH = 'csv-database/salas_reservadas.csv'
 LOCAL_DATABASE_ROOMS_PATH = 'csv-database/rooms.csv'
 
+user_logged_name = "MANDIOCA"
+
 app = Flask(__name__)
 
 @app.route('/', methods=['GET', 'POST'])
 def login_page():
+    global user_logged_name
     if request.method == 'GET':
         return render_template('login.html')
 
@@ -38,9 +50,12 @@ def login_page():
 
         users = load_csv(LOCAL_DATABASE_USERS_PATH)
 
-        correct_login = contains_register(users, lambda user: user[1] == email and user[2] == password)
+        return_of_register = contains_register(users, lambda user: user[1] == email and user[2] == password)
+
+        correct_login = return_of_register[0]
         
         if correct_login:
+            user_logged_name = return_of_register[1]
             return redirect('reservas')
 
         return render_template('login.html')
@@ -76,6 +91,8 @@ def reservas_page():
 
 @app.route('/reservar-sala', methods=['GET', 'POST'])
 def reservar_sala_page():
+    global user_logged_name
+
     if request.method == 'GET':
         lista_salas = []
 
@@ -88,20 +105,22 @@ def reservar_sala_page():
         sala = request.form['sala']
         inicio = request.form['inicio']
         fim = request.form['fim']
+        idezim = str(get_reserve_id())
 
-        sala_cadastrada = [sala,inicio,fim]
+        sala_cadastrada = [idezim,sala,inicio,fim]
         save_csv(LOCAL_DATABASE_RESERVED_ROOMS_PATH, sala_cadastrada)
 
-        sala_cadastrada[1] = sala_cadastrada[1].replace('T', ' - ')
         sala_cadastrada[2] = sala_cadastrada[2].replace('T', ' - ')
+        sala_cadastrada[3] = sala_cadastrada[3].replace('T', ' - ')
 
-        sala_cadastrada = [{
-            'sala' : sala_cadastrada[0],
-            'inicio' : sala_cadastrada[1],
-            'fim' : sala_cadastrada[2]
-        }]
+        sala_cadastrada = {
+            'ID' : sala_cadastrada[0].zfill(3),
+            'sala' : sala_cadastrada[1],
+            'inicio' : sala_cadastrada[2],
+            'fim' : sala_cadastrada[3]
+        }
 
-        return render_template('reserva/detalhe-reserva.html', reserve_details = sala_cadastrada)
+        return render_template('reserva/detalhe-reserva.html', reserve_details = sala_cadastrada, nome_usuario = user_logged_name)
 
 @app.route('/listar-salas')
 def listar_salas_page():
