@@ -116,6 +116,10 @@ def cadastrar_sala_page():
         tipo = request.form['tipo']
         capacidade = request.form['capacidade']
         descricao = request.form['descricao']
+
+        if not tipo or not capacidade or not descricao:
+            return render_template('cadastrar-sala.html')
+
         ide = get_room_id()
 
         room = [str(ide), tipo, capacidade, descricao, 'Sim']
