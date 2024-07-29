@@ -74,7 +74,7 @@ def cadastro_page():
 
         users = load_csv(LOCAL_DATABASE_USERS_PATH)
 
-        if contains_register(users, lambda user: user[1] == email):
+        if contains_register(users, lambda user: user[1] == email)[0]:
             return render_template('cadastro.html')
 
         user = [nome, email, password]
