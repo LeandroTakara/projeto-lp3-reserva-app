@@ -1,0 +1,35 @@
+create database if not exists ReservaApp;
+
+use ReservaApp;
+
+create table if not exists usuarios(
+	ID int auto_increment primary key not null,
+    nome varchar(60) not null,
+    email varchar(60) not null,
+    senha varchar(60) not null
+);
+
+create table if not exists rooms(
+	ID int auto_increment primary key not null,
+    tipo_sala varchar(60) not null,
+    capacidade int not null,
+    ativo boolean not null
+);
+
+create table if not exists reservas(
+	ID int auto_increment primary key not null,
+    inicio datetime not null,
+    fim datetime not null
+);
+
+alter table reservas
+	add ID_usuario int not null,
+    add constraint ID_usuario
+    foreign key (ID_usuario) references usuarios(ID),
+    add ID_sala int not null,
+    add constraint ID_sala
+    foreign key (ID_sala) references rooms(ID);
+    
+select * from reservas;
+select * from rooms;
+select * from usuarios;
