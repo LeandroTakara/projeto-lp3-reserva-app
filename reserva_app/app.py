@@ -1,6 +1,7 @@
 from flask import Flask, render_template, redirect, request
 from typing import Callable
 from .save_load import save_csv, load_csv
+from .connection import open_connection, close_connection, insert_into
 
 def get_room_id():
     with open(NEXT_ID_PATH, 'r') as room_id:
@@ -35,6 +36,13 @@ LOCAL_DATABASE_RESERVED_ROOMS_PATH = 'csv-database/salas_reservadas.csv'
 LOCAL_DATABASE_ROOMS_PATH = 'csv-database/rooms.csv'
 
 user_logged_name = "MANDIOCA"
+
+HOST = 'localhost'
+USER = 'root'
+PASSWORD = 'root'
+DATABASE = 'ReservaApp'
+
+con = open_connection(HOST, USER, PASSWORD, DATABASE)
 
 app = Flask(__name__)
 
@@ -149,6 +157,8 @@ def cadastrar_sala_page():
         room = [str(ide), tipo, capacidade, descricao, 'Sim']
 
         save_csv(LOCAL_DATABASE_ROOMS_PATH, room)
+
+        insert_into(con, 'rooms', tipo, capacidade, True)
 
         return render_template('cadastrar-sala.html')
 
