@@ -26,3 +26,4 @@ def insert_into(connection: (mysql.connector.pooling.PooledMySQLConnection | mys
     cursor.execute(sql)
     connection.commit()
     cursor.close()
+    

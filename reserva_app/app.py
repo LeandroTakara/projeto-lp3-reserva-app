@@ -2,6 +2,7 @@ from flask import Flask, render_template, redirect, request
 from typing import Callable
 from .save_load import save_csv, load_csv
 from .connection import open_connection, close_connection, insert_into
+import os
 
 def get_room_id():
     with open(NEXT_ID_PATH, 'r') as room_id:
@@ -30,9 +31,8 @@ user_logged_name = "MANDIOCA"
 
 HOST = 'localhost'
 USER = 'root'
-PASSWORD = 'bito132'
+PASSWORD = 'root'
 DATABASE = 'ReservaApp'
-
 con = open_connection(HOST, USER, PASSWORD, DATABASE)
 
 app = Flask(__name__)
@@ -69,7 +69,7 @@ def cadastro_page():
     if request.method == 'POST':
         nome = request.form['nome']
         email = request.form['email']
-        password = request.form['password']
+        password = request.form['PASSWORD']
 
         users = load_csv(LOCAL_DATABASE_USERS_PATH)
 
@@ -79,6 +79,7 @@ def cadastro_page():
         user = [nome, email, password]
 
         save_csv(LOCAL_DATABASE_USERS_PATH, user)
+        insert_into(con, 'usuarios', 'DEFAULT', nome, email, password)
 
         return render_template('login.html')
     
