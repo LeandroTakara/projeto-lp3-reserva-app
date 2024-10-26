@@ -12,6 +12,7 @@ create table if not exists usuarios(
 create table if not exists rooms(
 	ID int auto_increment primary key not null,
     tipo_sala varchar(60) not null,
+    descricao text,
     capacidade int not null,
     ativo boolean not null
 );

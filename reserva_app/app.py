@@ -12,15 +12,6 @@ def get_room_id():
 
     return ide
 
-def get_reserve_id():
-    with open(NEXT_RESERVE_ID_PATH, 'r') as reserve_id:
-        ide = int(reserve_id.read())
-        
-    with open(NEXT_RESERVE_ID_PATH, 'w') as reserve_id:
-        reserve_id.write(f"{ide+1}")
-
-    return ide
-
 def contains_register(registers: list[str], predicate: Callable[[], bool]) -> bool:
     for register in registers:
         if predicate(register):
@@ -39,7 +30,7 @@ user_logged_name = "MANDIOCA"
 
 HOST = 'localhost'
 USER = 'root'
-PASSWORD = 'root'
+PASSWORD = 'bito132'
 DATABASE = 'ReservaApp'
 
 con = open_connection(HOST, USER, PASSWORD, DATABASE)
@@ -113,7 +104,7 @@ def reservar_sala_page():
         sala = request.form['sala']
         inicio = request.form['inicio']
         fim = request.form['fim']
-        idezim = str(get_reserve_id())
+        idezim = 'atumalaca'
 
         sala_cadastrada = [idezim,sala,inicio,fim]
         save_csv(LOCAL_DATABASE_RESERVED_ROOMS_PATH, sala_cadastrada)
@@ -153,12 +144,11 @@ def cadastrar_sala_page():
             return render_template('cadastrar-sala.html')
 
         ide = get_room_id()
-
         room = [str(ide), tipo, capacidade, descricao, 'Sim']
 
         save_csv(LOCAL_DATABASE_ROOMS_PATH, room)
 
-        insert_into(con, 'rooms', tipo, capacidade, True)
+        insert_into(con, 'rooms', 'DEFAULT', tipo, descricao, capacidade, True)
 
         return render_template('cadastrar-sala.html')
 
