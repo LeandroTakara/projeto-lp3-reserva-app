@@ -1,29 +1,12 @@
 from flask import Flask, render_template, redirect, request
 from typing import Callable
-from .save_load import save_csv, load_csv
-from .connection import open_connection, close_connection, insert_into, select_user_ID, select_last_ID, select_rooms, select_rooms_ID, select_users
-
-def get_room_id():
-    with open(NEXT_ID_PATH, 'r') as room_id:
-        ide = int(room_id.read())
-        
-    with open(NEXT_ID_PATH, 'w') as room_id:
-        room_id.write(f"{ide+1}")
-
-    return ide
+from .connection import open_connection, insert_into, select_user_ID, select_last_ID, select_rooms, select_rooms_ID, select_users
 
 def contains_register(registers: list[str], predicate: Callable[[], bool]) -> bool:
     for register in registers:
         if predicate(register):
             return [True, register[0]]
     return [False]
-
-NEXT_ID_PATH = './csv-database/room_id.csv'
-NEXT_RESERVE_ID_PATH = './csv-database/reserve_id.csv'
-
-LOCAL_DATABASE_USERS_PATH = 'csv-database/users.csv'
-LOCAL_DATABASE_RESERVED_ROOMS_PATH = 'csv-database/salas_reservadas.csv'
-LOCAL_DATABASE_ROOMS_PATH = 'csv-database/rooms.csv'
 
 user_logged_name = "MANDIOCA"
 
@@ -74,9 +57,6 @@ def cadastro_page():
         if contains_register(users, lambda user: user[1] == email)[0]:
             return render_template('cadastro.html')
 
-        #user = [nome, email, password]
-
-        #save_csv(LOCAL_DATABASE_USERS_PATH, user)
         insert_into(con, 'usuarios', 'DEFAULT', nome, email, password)
 
         return render_template('login.html')
@@ -101,7 +81,6 @@ def reservar_sala_page():
         idezim = select_last_ID(con) + 1
 
         sala_cadastrada = [idezim,sala,inicio,fim]
-        #save_csv(LOCAL_DATABASE_RESERVED_ROOMS_PATH, sala_cadastrada)
 
         sala_cadastrada[2] = sala_cadastrada[2].replace('T', ' - ')
         sala_cadastrada[3] = sala_cadastrada[3].replace('T', ' - ')
@@ -136,11 +115,6 @@ def cadastrar_sala_page():
 
         if not tipo or not capacidade or not descricao:
             return render_template('cadastrar-sala.html')
-
-        #ide = get_room_id()
-        #room = [str(ide), tipo, capacidade, descricao, 'Sim']
-
-        #save_csv(LOCAL_DATABASE_ROOMS_PATH, room)
 
         insert_into(con, 'rooms', 'DEFAULT', tipo, descricao, capacidade, True)
 
