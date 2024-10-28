@@ -1,37 +1,18 @@
 from flask import Flask, render_template, redirect, request
 from typing import Callable
-from .save_load import save_csv, load_csv
-from .connection import open_connection, close_connection, insert_into
-import os
-
-def get_room_id():
-    with open(NEXT_ID_PATH, 'r') as room_id:
-        ide = int(room_id.read())
-        
-    with open(NEXT_ID_PATH, 'w') as room_id:
-        room_id.write(f"{ide+1}")
-
-    return ide
+from .connection import open_connection, insert_into, select_user_ID, select_last_ID, select_rooms, select_rooms_ID, select_users
 
 def contains_register(registers: list[str], predicate: Callable[[], bool]) -> bool:
     for register in registers:
         if predicate(register):
             return [True, register[0]]
-    
     return [False]
-
-NEXT_ID_PATH = './csv-database/room_id.csv'
-NEXT_RESERVE_ID_PATH = './csv-database/reserve_id.csv'
-
-LOCAL_DATABASE_USERS_PATH = 'csv-database/users.csv'
-LOCAL_DATABASE_RESERVED_ROOMS_PATH = 'csv-database/salas_reservadas.csv'
-LOCAL_DATABASE_ROOMS_PATH = 'csv-database/rooms.csv'
 
 user_logged_name = "MANDIOCA"
 
 HOST = 'localhost'
 USER = 'root'
-PASSWORD = 'root'
+PASSWORD = 'bito132'
 DATABASE = 'ReservaApp'
 con = open_connection(HOST, USER, PASSWORD, DATABASE)
 
@@ -47,7 +28,7 @@ def login_page():
         email = request.form['email']
         password = request.form['password']
 
-        users = load_csv(LOCAL_DATABASE_USERS_PATH)
+        users = select_users(con)
 
         return_of_register = contains_register(users, lambda user: user[1] == email and user[2] == password)
 
@@ -69,16 +50,13 @@ def cadastro_page():
     if request.method == 'POST':
         nome = request.form['nome']
         email = request.form['email']
-        password = request.form['PASSWORD']
+        password = request.form['password']
 
-        users = load_csv(LOCAL_DATABASE_USERS_PATH)
+        users = select_users(con)
 
         if contains_register(users, lambda user: user[1] == email)[0]:
             return render_template('cadastro.html')
 
-        user = [nome, email, password]
-
-        save_csv(LOCAL_DATABASE_USERS_PATH, user)
         insert_into(con, 'usuarios', 'DEFAULT', nome, email, password)
 
         return render_template('login.html')
@@ -94,42 +72,36 @@ def reservar_sala_page():
     global user_logged_name
 
     if request.method == 'GET':
-        lista_salas = []
-
-        for room in load_csv(LOCAL_DATABASE_ROOMS_PATH):
-            lista_salas.append({ 'ID': room[0] })
-
-        return render_template('reservar-sala.html', rooms_list = lista_salas)
+        return render_template('reservar-sala.html', rooms_list = select_rooms_ID(con))
 
     if request.method == 'POST':
         sala = request.form['sala']
         inicio = request.form['inicio']
         fim = request.form['fim']
-        idezim = 'atumalaca'
+        idezim = select_last_ID(con) + 1
 
         sala_cadastrada = [idezim,sala,inicio,fim]
-        save_csv(LOCAL_DATABASE_RESERVED_ROOMS_PATH, sala_cadastrada)
 
         sala_cadastrada[2] = sala_cadastrada[2].replace('T', ' - ')
         sala_cadastrada[3] = sala_cadastrada[3].replace('T', ' - ')
 
         sala_cadastrada = {
-            'ID' : sala_cadastrada[0].zfill(3),
+            'ID' : str(sala_cadastrada[0]).zfill(3),
             'sala' : sala_cadastrada[1],
             'inicio' : sala_cadastrada[2],
             'fim' : sala_cadastrada[3]
         }
+        
+        sala = int(sala)
+        id_usuario_atual = select_user_ID(con, user_logged_name)
+
+        insert_into(con, 'reservas', 'DEFAULT', inicio, fim, id_usuario_atual, sala)
 
         return render_template('reserva/detalhe-reserva.html', reserve_details = sala_cadastrada, nome_usuario = user_logged_name)
 
 @app.route('/listar-salas')
 def listar_salas_page():
-    lista_salas = []
-
-    for room in load_csv(LOCAL_DATABASE_ROOMS_PATH):
-        lista_salas.append({ 'ID': room[0], 'tipo': room[1], 'capacidade': room[2], 'descricao': room[3], 'ativa':room[4] })
-
-    return render_template('listar-salas.html', rooms_list = lista_salas)
+    return render_template('listar-salas.html', rooms_list = select_rooms(con))
 
 @app.route('/cadastrar-sala', methods= ['GET','POST'])
 def cadastrar_sala_page():
@@ -143,11 +115,6 @@ def cadastrar_sala_page():
 
         if not tipo or not capacidade or not descricao:
             return render_template('cadastrar-sala.html')
-
-        ide = get_room_id()
-        room = [str(ide), tipo, capacidade, descricao, 'Sim']
-
-        save_csv(LOCAL_DATABASE_ROOMS_PATH, room)
 
         insert_into(con, 'rooms', 'DEFAULT', tipo, descricao, capacidade, True)
 
